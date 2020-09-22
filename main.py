@@ -191,6 +191,8 @@ if __name__ == '__main__':
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=100, num_training_steps=1000)
 
     training_args = TrainingArguments(
+        do_train=True,
+        do_eval=True,
         output_dir='./results',
         num_train_epochs=args.epoch,
         per_device_train_batch_size=args.batch_size,
