@@ -203,7 +203,7 @@ if __name__ == '__main__':
         logging_steps=args.logging_steps,
         gradient_accumulation_steps=args.accumulation_steps,
         # save_steps=args.save_steps,
-        no_cuda=False if args.device == 'cuda' else True
+        # no_cuda=False if args.device == 'cuda' else True
     )
 
     trainer = Trainer(
