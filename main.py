@@ -1,10 +1,9 @@
 import os
-import sys
 import torch
-import logging
 import argparse
 import pandas as pd
 
+from tqdm import tqdm
 from vncorenlp import VnCoreNLP
 
 from transformers import AdamW
@@ -32,16 +31,31 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
         - UIT-VSFC
 """
 
+PHOBERT_ALIASES = [
+    'vinai/phobert-base',
+    'vinai/phobert-large'
+]
+
+TRANSFORMER_ALIASES = [
+    'bert-base-multilingual-uncased',
+    'bert-base-multilingual-cased',
+    'xlm-roberta-base',
+    'xlm-mlm-xnli15-1024',
+    'xlm-mlm-tlm-xnli15-1024',
+    'roberta-large-mnli',
+    'facebook/bart-large-mnli',
+]
+
+rdrsegmenter = None
+
 
 def rdr_word_segmenter(text):
-    rdrsegmenter = VnCoreNLP("/Absolute-path-to/vncorenlp/VnCoreNLP-1.1.1.jar", annotators="wseg",
-                             max_heap_size='-Xmx500m')
     sentences = rdrsegmenter.tokenize(text)
-    text = ' '.join([' '.join(sent for sent in sentences)])
+    text = ' '.join([' '.join(sent) for sent in sentences])
     return text
 
 
-def load_data(root='data', data='VLSP2016', is_train=True):
+def load_data(root='data', data='VLSP2016', is_train=True, is_phobert=False):
     if data == 'VLSP2016':
         df = pd.read_csv(os.path.join(root, data, 'SA-2016.train' if is_train else 'SA-2016.test'),
                          names=['sentence', 'label'],
@@ -65,6 +79,10 @@ def load_data(root='data', data='VLSP2016', is_train=True):
         texts, labels = [sent[8: -3].strip() for sent in file_reader], [int(sent[-1:]) for sent in file_reader]
         texts, labels = texts[: int(len(texts) * pivot)] if is_train else texts[int(len(texts) * pivot):], \
                         labels[: int(len(labels) * pivot)] if is_train else labels[int(len(labels) * pivot):]
+
+    if is_phobert is True:
+        texts = [rdr_word_segmenter(text) for text in tqdm(texts, 'Using RDR Segmenter for PhoBERT')]
+
     return texts, labels
 
 
@@ -110,7 +128,7 @@ if __name__ == '__main__':
     argument_parser.add_argument('--accumulation_step', type=int, default=50)
     argument_parser.add_argument('--device', type=str, default='cuda')
     argument_parser.add_argument('--root', type=str, default='data')
-    argument_parser.add_argument('--data', type=str, default='UIT-VSFC')
+    argument_parser.add_argument('--data', type=str, default='VLSP2016')
     argument_parser.add_argument('--batch_size', type=int, default=1)
     argument_parser.add_argument('--max_length', type=int, default=256)
     argument_parser.add_argument('--num_labels', type=int, default=3)
@@ -122,9 +140,15 @@ if __name__ == '__main__':
     args = argument_parser.parse_args()
     print(args)
 
+    if args.model in PHOBERT_ALIASES:
+        rdrsegmenter = VnCoreNLP("./vncorenlp/VnCoreNLP-1.1.1.jar", annotators="wseg",
+                                 max_heap_size='-Xmx500m')
+
     # load sentiment data
-    train_texts, train_labels = load_data(root=args.root, data=args.data, is_train=True)
-    test_texts, test_labels = load_data(root=args.root, data=args.data, is_train=False)
+    train_texts, train_labels = load_data(root=args.root, data=args.data, is_train=True,
+                                          is_phobert=args.model in PHOBERT_ALIASES)
+    test_texts, test_labels = load_data(root=args.root, data=args.data, is_train=False,
+                                        is_phobert=args.model in PHOBERT_ALIASES)
     assert train_texts.__len__() == train_labels.__len__(), IndexError
     assert test_texts.__len__() == test_labels.__len__(), IndexError
 
