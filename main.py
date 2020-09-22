@@ -138,7 +138,7 @@ if __name__ == '__main__':
                                  help='Number of classification labels (a.k.a sentiment polarities)')
     argument_parser.add_argument('--warmup_steps', type=int, default=300, help='Learning rate warming up step.')
     argument_parser.add_argument('--weight_decay', type=float, default=0.01, help='Training weight decay.')
-    argument_parser.add_argument('--save_steps', type=int, default=10, help='Number of step to save model.')
+    argument_parser.add_argument('--save_steps', type=int, default=500, help='Number of step to save model.')
     argument_parser.add_argument('--eval_steps', type=int, default=100, help='Number of step to evaluate model.')
     argument_parser.add_argument('--logging_steps', type=int, default=10, help='Number of step to write log.')
     args = argument_parser.parse_args()
@@ -204,7 +204,7 @@ if __name__ == '__main__':
         logging_dir='./logs',
         logging_steps=args.logging_steps,
         gradient_accumulation_steps=args.accumulation_steps,
-        # save_steps=args.save_steps,
+        save_steps=args.save_steps,
         # no_cuda=False if args.device == 'cuda' else True
     )
 
