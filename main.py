@@ -121,22 +121,26 @@ if __name__ == '__main__':
     # argument parsing
     argument_parser = argparse.ArgumentParser(description='Fine-tune transformer models for '
                                                           'Vietnamese Sentiment Analysis.')
-    argument_parser.add_argument('--model', type=str, default='vinai/phobert-base')
-    argument_parser.add_argument('--freeze_encoder', type=bool, default=True)
-    argument_parser.add_argument('--epoch', type=int, default=1)
-    argument_parser.add_argument('--learning_rate', type=int, default=1e-5)
-    argument_parser.add_argument('--accumulation_step', type=int, default=50)
-    argument_parser.add_argument('--device', type=str, default='cuda')
-    argument_parser.add_argument('--root', type=str, default='data')
-    argument_parser.add_argument('--data', type=str, default='VLSP2016')
-    argument_parser.add_argument('--batch_size', type=int, default=1)
-    argument_parser.add_argument('--max_length', type=int, default=256)
-    argument_parser.add_argument('--num_labels', type=int, default=3)
-    argument_parser.add_argument('--warmup_steps', type=int, default=100)
-    argument_parser.add_argument('--weight_decay', type=float, default=0.01)
-    argument_parser.add_argument('--save_steps', type=int, default=10)
-    argument_parser.add_argument('--eval_steps', type=int, default=100)
-    argument_parser.add_argument('--logging_steps', type=int, default=10)
+    argument_parser.add_argument('--model', type=str, default='vinai/phobert-base',
+                                 help='Model shortcut from pretrained hub.')
+    argument_parser.add_argument('--freeze_encoder', type=bool, default=True,
+                                 help='Whether BERT base encoder is freeze or not.')
+    argument_parser.add_argument('--epoch', type=int, default=1, help='Number of training epochs.')
+    argument_parser.add_argument('--learning_rate', type=int, default=1e-5, help='Model learning rate.')
+    argument_parser.add_argument('--accumulation_steps', type=int, default=50, help='Gradient accumulation steps.')
+    argument_parser.add_argument('--device', type=str, default='cuda', help='Training device.')
+    argument_parser.add_argument('--root', type=str, default='data', help='Directory to dataset.')
+    argument_parser.add_argument('--data', type=str, default='VLSP2016',
+                                 help='Which dataset use to train a.k.a (VLSP2016, UIT-VSFC, AIVIVN).')
+    argument_parser.add_argument('--batch_size', type=int, default=1, help='Training batch size.')
+    argument_parser.add_argument('--max_length', type=int, default=256, help='Maximum length of BERT tokenizer.')
+    argument_parser.add_argument('--num_labels', type=int, default=3,
+                                 help='Number of classification labels (a.k.a sentiment polarities)')
+    argument_parser.add_argument('--warmup_steps', type=int, default=100, help='Learning rate warming up step.')
+    argument_parser.add_argument('--weight_decay', type=float, default=0.01, help='Training weight decay.')
+    argument_parser.add_argument('--save_steps', type=int, default=10, help='Number of step to save model.')
+    argument_parser.add_argument('--eval_steps', type=int, default=100, help='Number of step to evaluate model.')
+    argument_parser.add_argument('--logging_steps', type=int, default=10, help='Number of step to write log.')
     args = argument_parser.parse_args()
     print(args)
 
@@ -163,7 +167,7 @@ if __name__ == '__main__':
     train_encodings, test_encodings = tokenizer(train_texts,
                                                 truncation=True,
                                                 padding=True,
-                                                max_length=args.max_length),\
+                                                max_length=args.max_length), \
                                       tokenizer(test_texts,
                                                 truncation=True,
                                                 padding=True,
@@ -197,8 +201,9 @@ if __name__ == '__main__':
         eval_steps=args.eval_steps,
         logging_dir='./logs',
         logging_steps=args.logging_steps,
+        gradient_accumulation_steps=args.accumulation_steps,
         # save_steps=args.save_steps,
-        no_cuda=False
+        no_cuda=False if args.device == 'cuda' else True
     )
 
     trainer = Trainer(
