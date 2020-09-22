@@ -136,7 +136,7 @@ if __name__ == '__main__':
     argument_parser.add_argument('--max_length', type=int, default=256, help='Maximum length of BERT tokenizer.')
     argument_parser.add_argument('--num_labels', type=int, default=3,
                                  help='Number of classification labels (a.k.a sentiment polarities)')
-    argument_parser.add_argument('--warmup_steps', type=int, default=100, help='Learning rate warming up step.')
+    argument_parser.add_argument('--warmup_steps', type=int, default=300, help='Learning rate warming up step.')
     argument_parser.add_argument('--weight_decay', type=float, default=0.01, help='Training weight decay.')
     argument_parser.add_argument('--save_steps', type=int, default=10, help='Number of step to save model.')
     argument_parser.add_argument('--eval_steps', type=int, default=100, help='Number of step to evaluate model.')
