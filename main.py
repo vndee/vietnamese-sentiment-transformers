@@ -25,6 +25,11 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
         - facebook/bart-large-mnli
         - vinai/phobert-base
         - vinai/phobert-large
+        
+    Data shortcut:
+        - VLSP2016
+        - AIVIVN
+        - UIT-VSFC
 """
 
 
@@ -112,6 +117,7 @@ if __name__ == '__main__':
     argument_parser.add_argument('--warmup_steps', type=int, default=100)
     argument_parser.add_argument('--weight_decay', type=float, default=0.01)
     argument_parser.add_argument('--save_steps', type=int, default=10)
+    argument_parser.add_argument('--eval_steps', type=int, default=100)
     argument_parser.add_argument('--logging_steps', type=int, default=10)
     args = argument_parser.parse_args()
     print(args)
@@ -164,6 +170,7 @@ if __name__ == '__main__':
         warmup_steps=args.warmup_steps,
         weight_decay=args.weight_decay,
         evaluate_during_training=True,
+        eval_steps=args.eval_steps,
         logging_dir='./logs',
         logging_steps=args.logging_steps,
         # save_steps=args.save_steps,

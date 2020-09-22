@@ -1,5 +1,7 @@
 # Install PyTorch
 pip install torch
+pip install pandas
+pip install scikit-learn
 
 # Install transformers
 git clone https://github.com/huggingface/transformers.git
